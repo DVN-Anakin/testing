@@ -1,0 +1,77 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+   <meta charset="utf-8">
+
+   <title>Confirmation Page</title>
+   <script>
+      // Deklarace promenne sendSomeCode za pouziti 'let', coz znemoznuje pozdejsi redekleraci
+      let sendSomeCode = (function() {
+         // something later
+      });
+
+
+      // Pockame na vyrendrovani DOMu
+      document.addEventListener('DOMContentLoaded', function() {
+      
+      // Spravna sendSomeCode() funkce
+      sendSomeCode = (function(trsId) {
+         console.log("Sending code correctly: " + trsId);
+      });
+
+      // Ziskame kod vadneho skriptu
+      var failingScriptEl = document.querySelectorAll("head script")[1];
+      var failingScriptCode = failingScriptEl.innerHTML;
+
+      // Vyparsujeme transactionId z vadneho skriptu
+      var transactionId = (/var transactionId = "(.*?)"/gm).exec(failingScriptCode)[1];
+      
+      // Vyprazdnit vadny skript
+      failingScriptEl.innerHTML = ""; 
+      failingScriptEl .setAttribute('type', 'application/x-suppress');
+
+      // Local Storage
+      var lsName = "lsMallcz";
+      var lsData = {
+         confirmationTransactionId: transactionId
+      };
+      
+      if (localStorage.getItem(lsName)) { 
+         var lsMallczJSON = JSON.parse(localStorage.getItem(lsName));  
+
+	   // Pokud transactionId jeste nebylo odeslano do Analytics
+         if(lsMallczJSON.confirmationTransactionId !== transactionId) {
+            localStorage.setItem(lsName, JSON.stringify(lsData))
+             
+            sendSomeCode(transactionId);
+         } else { 
+            console.log("This transactionId has already been sent before");
+         }
+      }	else {
+         localStorage.setItem(lsName, JSON.stringify(lsData))
+
+         sendSomeCode(transactionId);
+      }
+   });
+</script>
+
+<!-- Vadny script -->
+<script>
+   var transactionId = "ABCD123456789";
+  
+   var sendSomeCode = (function(){
+      console.log('Sending code: ' + transactionId);
+   });
+  
+   sendSomeCode();
+   sendSomeCode();
+</script>
+<script>
+   console.log("Something ... testing ... rendering some DOM element etc.");
+</script>
+</head>
+
+<body>
+</body>
+</html>
